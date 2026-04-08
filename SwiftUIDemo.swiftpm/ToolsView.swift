@@ -17,66 +17,21 @@ struct ToolsView: View {
                 .buttonStyle(.borderedProminent)
             }
             .navigationTitle("Tools")
-            .sheet(isPresented: $showURLInput) {
-                URLInputView(urlString: $urlString, onOK: {
-                    if let url = URL(string: urlString) {
-                        loadedURL = url
-                        showURLInput = false
-                        showWebView = true
-                    }
-                }, onCancel: {
-                    showURLInput = false
-                })
-            }
-            .fullScreenCover(isPresented: $showWebView) {
-                WebContentView(url: loadedURL, onClose: { showWebView = false })
-            }
-        }
-    }
-}
-
-struct URLInputView: View {
-    @Binding var urlString: String
-    let onOK: () -> Void
-    let onCancel: () -> Void
-
-    @FocusState private var isFieldFocused: Bool
-
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button("Cancel") { onCancel() }
-                Spacer()
-                Text("Load HTML")
-                    .font(.headline)
-                Spacer()
-                Button("OK") { onOK() }
-                    .disabled(urlString.isEmpty || URL(string: urlString) == nil)
-            }
-            .padding()
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("URL")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            .alert("Load HTML", isPresented: $showURLInput) {
                 TextField("https://example.com", text: $urlString)
                     .keyboardType(.URL)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
-                    .focused($isFieldFocused)
-                    .padding(10)
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(8)
+                Button("OK") {
+                    if let url = URL(string: urlString) {
+                        loadedURL = url
+                        showWebView = true
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
             }
-            .padding()
-
-            Spacer()
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isFieldFocused = true
+            .fullScreenCover(isPresented: $showWebView) {
+                WebContentView(url: loadedURL, onClose: { showWebView = false })
             }
         }
     }
