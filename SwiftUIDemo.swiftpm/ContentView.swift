@@ -9,6 +9,8 @@ struct ContentView: View {
                 .tabItem { Label("Formes", systemImage: "square.on.circle") }
             InteractiveDemo()
                 .tabItem { Label("Interactif", systemImage: "hand.tap") }
+            ToolsView()
+                .tabItem { Label("Tools", systemImage: "wrench.and.screwdriver") }
         }
     }
 }
