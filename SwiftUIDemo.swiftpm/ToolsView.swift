@@ -40,14 +40,17 @@ struct URLInputView: View {
     let onOK: () -> Void
     let onCancel: () -> Void
 
+    @FocusState private var isFieldFocused: Bool
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("URL")) {
                     TextField("https://example.com", text: $urlString)
                         .keyboardType(.URL)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
+                        .focused($isFieldFocused)
                 }
             }
             .navigationTitle("Load HTML")
@@ -59,6 +62,11 @@ struct URLInputView: View {
                     Button("OK") { onOK() }
                         .disabled(urlString.isEmpty || URL(string: urlString) == nil)
                 }
+            }
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                isFieldFocused = true
             }
         }
     }
