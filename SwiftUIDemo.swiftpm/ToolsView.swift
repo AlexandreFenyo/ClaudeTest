@@ -5,7 +5,7 @@ struct ToolsView: View {
     @State private var showURLInput = false
     @State private var showWebView = false
     @State private var urlString = ""
-    @State private var loadedURL: URL? = nil
+    @State private var loadedURL: URL?
 
     var body: some View {
         NavigationView {
@@ -18,20 +18,18 @@ struct ToolsView: View {
             }
             .navigationTitle("Tools")
             .sheet(isPresented: $showURLInput) {
-                URLInputView(urlString: $urlString) {
+                URLInputView(urlString: $urlString, onOK: {
                     if let url = URL(string: urlString) {
                         loadedURL = url
                         showURLInput = false
                         showWebView = true
                     }
-                } onCancel: {
+                }, onCancel: {
                     showURLInput = false
-                }
+                })
             }
             .fullScreenCover(isPresented: $showWebView) {
-                if let url = loadedURL {
-                    WebContentView(url: url, onClose: { showWebView = false })
-                }
+                WebContentView(url: loadedURL, onClose: { showWebView = false })
             }
         }
     }
@@ -59,7 +57,7 @@ struct URLInputView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("OK") { onOK() }
-                        .disabled(URL(string: urlString) == nil || urlString.isEmpty)
+                        .disabled(urlString.isEmpty || URL(string: urlString) == nil)
                 }
             }
         }
@@ -67,13 +65,13 @@ struct URLInputView: View {
 }
 
 struct WebContentView: View {
-    let url: URL
+    let url: URL?
     let onClose: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(url.absoluteString)
+                Text(url?.absoluteString ?? "")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
@@ -86,13 +84,15 @@ struct WebContentView: View {
             .background(Color(.systemBackground))
             .overlay(Divider(), alignment: .bottom)
 
-            WebView(url: url)
+            if let url = url {
+                WKWebViewRepresentable(url: url)
+            }
         }
         .ignoresSafeArea(edges: .bottom)
     }
 }
 
-struct WebView: UIViewRepresentable {
+struct WKWebViewRepresentable: UIViewRepresentable {
     let url: URL
 
     func makeUIView(context: Context) -> WKWebView {
