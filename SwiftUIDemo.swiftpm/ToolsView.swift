@@ -43,29 +43,39 @@ struct URLInputView: View {
     @FocusState private var isFieldFocused: Bool
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section(header: Text("URL")) {
-                    TextField("https://example.com", text: $urlString)
-                        .keyboardType(.URL)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .focused($isFieldFocused)
-                }
+        VStack(spacing: 0) {
+            HStack {
+                Button("Cancel") { onCancel() }
+                Spacer()
+                Text("Load HTML")
+                    .font(.headline)
+                Spacer()
+                Button("OK") { onOK() }
+                    .disabled(urlString.isEmpty || URL(string: urlString) == nil)
             }
-            .navigationTitle("Load HTML")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { onCancel() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("OK") { onOK() }
-                        .disabled(urlString.isEmpty || URL(string: urlString) == nil)
-                }
+            .padding()
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("URL")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                TextField("https://example.com", text: $urlString)
+                    .keyboardType(.URL)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .focused($isFieldFocused)
+                    .padding(10)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
             }
+            .padding()
+
+            Spacer()
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 isFieldFocused = true
             }
         }
